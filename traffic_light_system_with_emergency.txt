@@ -1,0 +1,171 @@
+module traffic_light(e,et,ef,s,st,sf,w,wt,wf,n,nt,nf,clk,rst,em_e,em_w,em_n,em_s);
+  input clk;
+  input rst,em_e,em_w,em_n,em_s;
+  output reg [2:0]e,et,ef,s,st,sf,w,wt,wf,n,nt,nf;
+  
+  parameter s1=0, s2=1,s3=2, s4=3, s5=4;
+  reg [2:0]count;
+  reg [2:0]ps;
+  parameter delay=4,delaynew=2;
+  
+  always@(posedge clk or posedge rst or em_e or em_w or em_n or em_s)
+  begin
+    if(em_e)
+      begin
+        e<=3'b001;et<=3'b001;ef<=3'b001;
+        s<=3'b100;st<=3'b100;sf<=3'b100;
+        w<=3'b100;wt<=3'b100;wf<=3'b100;
+        n<=3'b100;nt<=3'b100;nf<=3'b100;
+      end
+    else if(em_s)
+      begin
+        e<=3'b100;et<=3'b100;ef<=3'b100;
+        s<=3'b001;st<=3'b001;sf<=3'b001;
+        w<=3'b100;wt<=3'b100;wf<=3'b100;
+        n<=3'b100;nt<=3'b100;nf<=3'b100;
+      end
+    else if(em_w)
+      begin
+        e<=3'b100;et<=3'b100;ef<=3'b100;
+        s<=3'b100;st<=3'b100;sf<=3'b100;
+        w<=3'b001;wt<=3'b001;wf<=3'b001;
+        n<=3'b100;nt<=3'b100;nf<=3'b100;
+      end
+    else if(em_n)
+      begin
+        e<=3'b100;et<=3'b100;ef<=3'b100;
+        s<=3'b100;st<=3'b100;sf<=3'b100;
+        w<=3'b100;wt<=3'b100;wf<=3'b100;
+        n<=3'b001;nt<=3'b001;nf<=3'b001;
+      end
+   else if(rst)
+      begin
+      ps<=s1;
+      count<=0;
+      end
+    else
+      case(ps)
+        s1:if(count<delaynew)
+            begin
+            ps<=s1;
+            count<=count+1;
+            end
+           else
+            begin
+              ps<=s2;
+              count<=0;
+            end
+        s2:if(count<delay)
+            begin
+            ps<=s2;
+            count<=count+1;
+            end
+           else
+            begin
+              ps<=s3;
+              count<=0;
+            end
+        s3:if(count<delay)
+            begin
+            ps<=s3;
+            count<=count+1;
+            end
+           else
+            begin
+              ps<=s4;
+              count<=0;
+            end
+          s4:if(count<delay)
+            begin
+            ps<=s4;
+            count<=count+1;
+            end
+           else
+            begin
+              ps<=s5;
+              count<=0;
+            end
+          s5:if(count<delay)
+            begin
+            ps<=s5;
+            count<=count+1;
+            end
+           else
+            begin
+              ps<=s1;
+              count<=0;
+            end
+            default:ps<=s1;
+        endcase         
+  end
+  
+  always@(ps)
+  begin
+    case(ps)
+      s1:
+      begin
+        e<=3'b000;et<=3'b000;ef<=3'b000;
+        s<=3'b000;st<=3'b000;sf<=3'b000;
+        w<=3'b000;wt<=3'b000;wf<=3'b000;
+        n<=3'b000;nt<=3'b000;nf<=3'b000;
+      end
+       s2:
+      begin
+        e<=3'b001;et<=3'b001;ef<=3'b001;
+        s<=3'b100;st<=3'b100;sf<=3'b001;
+        w<=3'b100;wt<=3'b100;wf<=3'b001;
+        n<=3'b100;nt<=3'b100;nf<=3'b001;
+      end
+       s3:
+      begin
+        e<=3'b100;et<=3'b100;ef<=3'b001;
+        s<=3'b001;st<=3'b001;sf<=3'b001;
+        w<=3'b100;wt<=3'b100;wf<=3'b001;
+        n<=3'b100;nt<=3'b100;nf<=3'b001;
+      end
+       s4:
+      begin
+        e<=3'b100;et<=3'b100;ef<=3'b001;
+        s<=3'b100;st<=3'b100;sf<=3'b001;
+        w<=3'b001;wt<=3'b001;wf<=3'b001;
+        n<=3'b100;nt<=3'b100;nf<=3'b001;
+      end
+       s5:
+      begin
+        e<=3'b100;et<=3'b100;ef<=3'b001;
+        s<=3'b100;st<=3'b100;sf<=3'b001;
+        w<=3'b100;wt<=3'b100;wf<=3'b001;
+        n<=3'b001;nt<=3'b001;nf<=3'b001;
+      end
+      default:
+      begin
+        e<=3'b000;et<=3'b000;ef<=3'b000;
+        s<=3'b000;st<=3'b000;sf<=3'b000;
+        w<=3'b000;wt<=3'b000;wf<=3'b000;
+        n<=3'b000;nt<=3'b000;nf<=3'b000;
+      end
+    endcase
+  end 
+endmodule
+
+module traffic_light_emergency_tb();
+  reg clk;
+  reg rst,em_e,em_w,em_n,em_s;
+  wire [2:0]e,et,ef,s,st,sf,w,wt,wf,n,nt,nf;
+  traffic_light dut(e,et,ef,s,st,sf,w,wt,wf,n,nt,nf,clk,rst,em_e,em_w,em_n,em_s);
+  initial
+  begin
+    clk=1'b1;
+    forever #1 clk=~clk;
+  end
+  initial
+  begin
+    #10 em_e=1;
+    #10 em_e=0;em_w=1;
+    #10 em_w=0;em_n=1;
+    #10 em_n=0;em_s=1;
+    #10 em_s=0;rst=1;
+    #10 rst=0;
+  end
+    
+endmodule
